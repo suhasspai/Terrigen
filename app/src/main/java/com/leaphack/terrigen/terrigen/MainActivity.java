@@ -19,10 +19,13 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import static android.app.Activity.RESULT_OK;
+
 public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
     private LinearLayout messageScrollView;
     private final int REQ_CODE_SPEECH_INPUT = 100;
     private final String TAG = "Terrigen";
+    private int index = 0;
     private TextToSpeech textToSpeechEngine;
     private EditText userInputTextbox;
 
@@ -48,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 .inflate(R.layout.receiver_message, null);
         TextView senderMessageView = (TextView) ((LinearLayout) senderMessageLayout
                 .getChildAt(0)).getChildAt(0);
-        final ScrollView scrollWindow =  findViewById(R.id.scroll_window);
+        final ScrollView scrollWindow = findViewById(R.id.scroll_window);
         senderMessageView.setText(message);
         messageScrollView.addView(senderMessageLayout);
         scrollWindow.post(new Runnable() {
@@ -58,11 +61,12 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         });
     }
 
-    private void addQuickResponses() {
+    private void addResponses(int index) {
         String[] quickResponses = getResources().getStringArray(R.array.quick_responses);
         LinearLayout quickResponsesLayout = findViewById(R.id.responses_list);
+        quickResponsesLayout.removeAllViews();
         final MainActivity activity = this;
-        for (final String response : quickResponses) {
+        for (final String response : quickResponses[index].split(",")) {
             Button button = new Button(this);
             button.setText(response);
             button.setTextColor(getResources().getColor(R.color.purple));
@@ -84,7 +88,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         Log.d(TAG, "Saved instance state" + savedInstanceState);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        this.addQuickResponses();
         messageScrollView = findViewById(R.id.messageWindow);
         textToSpeechEngine = new TextToSpeech(this, this);
     }
@@ -106,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     Log.d(TAG, messageList.toString());
                     receiverMessage = messageList.get(0);
                     this.displayReceiverMessageInChatWindow(receiverMessage);
+                    this.addResponses(index++);
                 }
 
                 break;
